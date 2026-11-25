@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Category: {{ category_name }} | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div>
+            <div class="small text-muted mb-1">
+                <i class="bi bi-regex me-1"></i> Academic Routing Demo: <code>re_path(r'^donations/category/(?P&lt;category_code&gt;...)/$')</code>
+            </div>
+            <h1 class="fw-bold text-dark mb-1">Category: {{ category_name }}</h1>
+            <p class="text-muted mb-0">Showing available food listings under code <code>{{ category_code }}</code></p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <a href="{% url 'donations:donation_list' %}" class="btn btn-outline-forest">
+                <i class="bi bi-arrow-left me-1"></i> All Categories
+            </a>
+        </div>
+    </div>
+
+    {% if donations %}
+        <div class="row g-4">
+            {% for donation in donations %}
+                <div class="col-lg-4 col-md-6">
+                    {% include 'includes/donation_card.html' with donation=donation %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state-box my-4">
+            <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+            <h4 class="fw-bold text-dark">No Active Donations in {{ category_name }}</h4>
+            <p class="text-muted mb-3">Check back later or browse other food categories.</p>
+            <a href="{% url 'donations:donation_list' %}" class="btn btn-primary">
+                Browse All Available Food
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

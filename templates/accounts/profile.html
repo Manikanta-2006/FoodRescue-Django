@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings & Profile | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='profile' %}
+        </div>
+
+        <!-- Main Profile Content -->
+        <div class="col-lg-9">
+            <div class="card form-card shadow-sm border-0">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1">Account & Profile Settings</h3>
+                        <p class="text-muted small mb-0">Update your contact details, organization name, and profile photo</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            {{ profile.role }} Account
+                        </span>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <h5 class="fw-bold text-success mb-3"><i class="bi bi-person-fill"></i> User Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            {{ u_form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            {{ u_form.last_name }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Email Address</label>
+                            {{ u_form.email }}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-success mb-3"><i class="bi bi-building"></i> Organization & Contact Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Organization / Business Name</label>
+                            {{ p_form.organization_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contact Phone</label>
+                            {{ p_form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">City / Locality</label>
+                            {{ p_form.city }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Profile Image</label>
+                            {{ p_form.profile_image }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Registered Address</label>
+                            {{ p_form.address }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <small class="text-muted">Account created: {{ user.date_joined|date:"F d, Y" }}</small>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check2-circle me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

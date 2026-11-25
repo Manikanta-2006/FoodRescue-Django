@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Deliveries & Pickup Logistics | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='available_tasks' %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Volunteer Logistics Dispatch</h2>
+                    <p class="text-muted small mb-0">Browse open courier tasks, active runs, and your completed delivery log</p>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-pills mb-4" id="deliveryTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a href="{% url 'requests:volunteer_deliveries' %}?tab=available" class="nav-link {% if current_tab == 'available' %}active bg-warning text-dark fw-bold{% else %}text-secondary{% endif %}">
+                        <i class="bi bi-geo-alt-fill me-1"></i> Available Pickups ({{ available_deliveries.count }})
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a href="{% url 'requests:volunteer_deliveries' %}?tab=my_tasks" class="nav-link {% if current_tab == 'my_tasks' %}active bg-primary fw-bold{% else %}text-secondary{% endif %}">
+                        <i class="bi bi-truck me-1"></i> My Active Runs ({{ my_active.count }})
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a href="{% url 'requests:volunteer_deliveries' %}?tab=history" class="nav-link {% if current_tab == 'history' %}active bg-success fw-bold{% else %}text-secondary{% endif %}">
+                        <i class="bi bi-clock-history me-1"></i> Completed History ({{ my_history.count }})
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Content Area Depending on Active Tab -->
+            {% if current_tab == 'available' %}
+                <!-- Available Deliveries Tab -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Task ID</th>
+                                    <th>Food Item</th>
+                                    <th>Quantity</th>
+                                    <th>Donor Pickup Address</th>
+                                    <th>Deliver To (NGO)</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in available_deliveries %}
+                                    <tr>
+                                        <td><strong>#{{ d.id }}</strong></td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ d.food_request.donation.food_name }}</div>
+                                            <small class="text-muted">{{ d.food_request.donation.get_category_display }}</small>
+                                        </td>
+                                        <td><strong>{{ d.food_request.quantity_requested }}</strong> {{ d.food_request.donation.get_unit_display }}</td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ d.food_request.donation.pickup_address }}</div>
+                                            <small class="text-muted">{{ d.food_request.donation.city }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ d.food_request.receiver.profile.organization_name|default:d.food_request.receiver.username }}</div>
+                                            <small class="text-muted">{{ d.food_request.receiver.profile.address|default:d.food_request.receiver.profile.city }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'requests:volunteer_claim_delivery' pk=d.id %}" class="btn btn-sm btn-success">
+                                                <i class="bi bi-hand-index-thumb me-1"></i> Claim Pickup
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="bi bi-check2-circle fs-2 text-success mb-2 d-block"></i>
+                                            All food donations have couriers assigned! Thank you for checking.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            {% elif current_tab == 'my_tasks' %}
+                <!-- My Active Runs Tab -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Task ID</th>
+                                    <th>Food Item</th>
+                                    <th>Pickup From</th>
+                                    <th>Deliver To</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in my_active %}
+                                    <tr>
+                                        <td><strong>#{{ d.id }}</strong></td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ d.food_request.donation.food_name }}</div>
+                                            <small class="text-muted">{{ d.food_request.quantity_requested }} {{ d.food_request.donation.get_unit_display }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ d.food_request.donation.donor.profile.organization_name|default:d.food_request.donation.donor.username }}</div>
+                                            <small class="text-muted">{{ d.food_request.donation.pickup_address|truncatewords:5 }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ d.food_request.receiver.profile.organization_name|default:d.food_request.receiver.username }}</div>
+                                            <small class="text-muted">{{ d.food_request.receiver.profile.address|truncatewords:5 }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if d.delivery_status == 'ASSIGNED' %}bg-warning text-dark
+                                                {% elif d.delivery_status == 'PICKED_UP' %}bg-info text-dark
+                                                {% elif d.delivery_status == 'IN_TRANSIT' %}bg-primary
+                                                {% else %}bg-secondary{% endif %}">
+                                                {{ d.get_delivery_status_display }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'requests:volunteer_delivery_detail' pk=d.id %}" class="btn btn-sm btn-primary">
+                                                Update Status &rarr;
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            No active deliveries at the moment. Claim an available pickup to get started!
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            {% else %}
+                <!-- History Tab -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Task ID</th>
+                                    <th>Food Item</th>
+                                    <th>Quantity</th>
+                                    <th>Delivered To</th>
+                                    <th>Delivery Time</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in my_history %}
+                                    <tr>
+                                        <td><strong>#{{ d.id }}</strong></td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ d.food_request.donation.food_name }}</div>
+                                        </td>
+                                        <td><strong>{{ d.food_request.quantity_requested }}</strong> {{ d.food_request.donation.get_unit_display }}</td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ d.food_request.receiver.profile.organization_name|default:d.food_request.receiver.username }}</div>
+                                        </td>
+                                        <td><span class="small text-muted">{{ d.delivery_time|date:"M d, Y - H:i" }}</span></td>
+                                        <td><span class="small text-secondary">{{ d.remarks|default:"Delivered safely"|truncatewords:8 }}</span></td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            No completed deliveries recorded yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

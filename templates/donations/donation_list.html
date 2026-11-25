@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Food Donations – FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="fw-bold text-dark mb-1">Browse Available Food Donations</h1>
+        <p class="text-muted mb-0">Search and filter active donations by category, city, and status.</p>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card p-3 p-md-4 rounded-4 shadow-sm border-0 mb-4 bg-white">
+        <form method="GET" action="{% url 'donations:donation_list' %}">
+            <div class="row g-3 align-items-end">
+                <!-- Search query -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label small fw-bold text-muted">Search Food or Description</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="e.g. Rice, Bread, Apple..." value="{{ current_q }}">
+                    </div>
+                </div>
+
+                <!-- Category filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for code, label in categories %}
+                            <option value="{{ code }}" {% if current_category == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- City filter -->
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-muted">City / Locality</label>
+                    <select name="city" class="form-select">
+                        <option value="">All Cities</option>
+                        {% for c in cities %}
+                            <option value="{{ c }}" {% if current_city == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Status filter -->
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-muted">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="AVAILABLE" {% if current_status == 'AVAILABLE' %}selected{% endif %}>Available Now</option>
+                        <option value="ALL" {% if current_status == 'ALL' %}selected{% endif %}>All Statuses</option>
+                        <option value="ACCEPTED" {% if current_status == 'ACCEPTED' %}selected{% endif %}>Accepted</option>
+                        <option value="COLLECTED" {% if current_status == 'COLLECTED' %}selected{% endif %}>In Transit</option>
+                        <option value="DELIVERED" {% if current_status == 'DELIVERED' %}selected{% endif %}>Delivered</option>
+                    </select>
+                </div>
+
+                <!-- Submit / Reset -->
+                <div class="col-lg-1 col-md-12 text-end">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100" title="Apply filters">
+                            <i class="bi bi-funnel-fill"></i>
+                        </button>
+                        {% if current_q or current_category or current_city or current_status != 'AVAILABLE' %}
+                            <a href="{% url 'donations:donation_list' %}" class="btn btn-outline-secondary" title="Reset filters">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted small">
+            Showing <strong>{{ total_count }}</strong> food donation{{ total_count|pluralize }}
+            {% if current_q %} matching "<em>{{ current_q }}</em>"{% endif %}
+            {% if current_category %} in selected category{% endif %}
+        </div>
+        <div>
+            <!-- Link to Category regex view for viva academic requirement demonstration -->
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Filter via Regex Pattern
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><h6 class="dropdown-header">Academic re_path() Category Links</h6></li>
+                    <li><a class="dropdown-item" href="{% url 'donations:donation_by_category' category_code='COOKED_MEALS' %}">Cooked Meals</a></li>
+                    <li><a class="dropdown-item" href="{% url 'donations:donation_by_category' category_code='RAW_GROCERIES' %}">Raw Groceries</a></li>
+                    <li><a class="dropdown-item" href="{% url 'donations:donation_by_category' category_code='BAKERY_BREAD' %}">Bakery & Bread</a></li>
+                    <li><a class="dropdown-item" href="{% url 'donations:donation_by_category' category_code='FRUITS_VEGGIES' %}">Fruits & Veggies</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Cards Grid -->
+    {% if donations %}
+        <div class="row g-4">
+            {% for donation in donations %}
+                <div class="col-lg-4 col-md-6">
+                    {% include 'includes/donation_card.html' with donation=donation %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state-box my-4">
+            <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+            <h4 class="fw-bold text-dark">No Food Donations Found</h4>
+            <p class="text-muted mb-3">Try adjusting your keyword, removing category filters, or selecting "All Statuses".</p>
+            <a href="{% url 'donations:donation_list' %}" class="btn btn-outline-forest">
+                <i class="bi bi-arrow-clockwise me-1"></i> Clear All Filters
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

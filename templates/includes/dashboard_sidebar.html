@@ -1,0 +1,93 @@
+{% load static %}
+<div class="dashboard-sidebar">
+    <div class="user-avatar-box">
+        {% if user_profile.profile_image %}
+            <img src="{{ user_profile.profile_image.url }}" alt="{{ user.username }}" class="avatar-img">
+        {% else %}
+            <div class="avatar-img d-inline-flex align-items-center justify-content-center bg-success text-white fs-3 fw-bold mx-auto">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+        {% endif %}
+        
+        <h5 class="mb-1 text-dark fw-bold">{{ user.get_full_name|default:user.username }}</h5>
+        
+        <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+            <span class="badge 
+                {% if is_donor %}bg-success
+                {% elif is_ngo %}bg-primary
+                {% elif is_volunteer %}bg-warning text-dark
+                {% else %}bg-secondary{% endif %} rounded-pill px-2.5 py-1">
+                {{ user_profile.role|default:"Platform Member" }}
+            </span>
+            {% if is_verified_ngo %}
+                <span class="badge bg-info text-dark" title="Verified NGO Organization">
+                    <i class="bi bi-patch-check-fill"></i> Verified
+                </span>
+            {% endif %}
+        </div>
+
+        {% if user_profile.organization_name %}
+            <div class="small text-muted fw-semibold">{{ user_profile.organization_name }}</div>
+        {% endif %}
+        <div class="small text-muted"><i class="bi bi-geo-alt"></i> {{ user_profile.city|default:"Central City" }}</div>
+    </div>
+
+    <!-- Role-Specific Sidebar Nav Links -->
+    <nav class="nav flex-column">
+        {% if is_donor %}
+            <a href="{% url 'donations:donor_dashboard' %}" class="sidebar-nav-link {% if active_tab == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Dashboard Overview
+            </a>
+            <a href="{% url 'donations:donor_add_donation' %}" class="sidebar-nav-link {% if active_tab == 'add_donation' %}active{% endif %}">
+                <i class="bi bi-plus-circle-fill text-success"></i> Post Food Donation
+            </a>
+            <a href="{% url 'donations:donor_my_donations' %}" class="sidebar-nav-link {% if active_tab == 'my_donations' %}active{% endif %}">
+                <i class="bi bi-collection-fill"></i> My Donations
+            </a>
+            <a href="{% url 'requests:donor_incoming_requests' %}" class="sidebar-nav-link {% if active_tab == 'incoming_requests' %}active{% endif %}">
+                <i class="bi bi-inbox-fill text-warning"></i> Incoming Requests
+            </a>
+        {% elif is_ngo %}
+            <a href="{% url 'requests:ngo_dashboard' %}" class="sidebar-nav-link {% if active_tab == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> NGO Dashboard
+            </a>
+            <a href="{% url 'donations:donation_list' %}" class="sidebar-nav-link {% if active_tab == 'browse' %}active{% endif %}">
+                <i class="bi bi-search text-primary"></i> Browse Available Food
+            </a>
+            <a href="{% url 'requests:ngo_my_requests' %}" class="sidebar-nav-link {% if active_tab == 'my_requests' %}active{% endif %}">
+                <i class="bi bi-bag-check-fill text-danger"></i> My Requests & Tracking
+            </a>
+        {% elif is_volunteer %}
+            <a href="{% url 'requests:volunteer_dashboard' %}" class="sidebar-nav-link {% if active_tab == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Volunteer Dashboard
+            </a>
+            <a href="{% url 'requests:volunteer_deliveries' %}?tab=available" class="sidebar-nav-link {% if active_tab == 'available_tasks' %}active{% endif %}">
+                <i class="bi bi-bicycle text-warning"></i> Available Pickups
+            </a>
+            <a href="{% url 'requests:volunteer_deliveries' %}?tab=my_tasks" class="sidebar-nav-link {% if active_tab == 'my_tasks' %}active{% endif %}">
+                <i class="bi bi-truck text-info"></i> Active Deliveries
+            </a>
+            <a href="{% url 'requests:volunteer_deliveries' %}?tab=history" class="sidebar-nav-link {% if active_tab == 'history' %}active{% endif %}">
+                <i class="bi bi-clock-history text-success"></i> Delivery History
+            </a>
+        {% endif %}
+
+        {% if user.is_staff or user.is_superuser %}
+            <hr class="my-2 text-muted">
+            <a href="{% url 'donations:admin_dashboard' %}" class="sidebar-nav-link {% if active_tab == 'admin_overview' %}active{% endif %}">
+                <i class="bi bi-bar-chart-line-fill text-primary"></i> Platform Analytics
+            </a>
+            <a href="{% url 'admin:index' %}" target="_blank" class="sidebar-nav-link">
+                <i class="bi bi-shield-lock-fill text-secondary"></i> Django Admin Panel
+            </a>
+        {% endif %}
+
+        <hr class="my-2 text-muted">
+        <a href="{% url 'accounts:profile' %}" class="sidebar-nav-link {% if active_tab == 'profile' %}active{% endif %}">
+            <i class="bi bi-person-fill-gear"></i> Account Settings
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="sidebar-nav-link text-danger">
+            <i class="bi bi-box-arrow-right"></i> Sign Out
+        </a>
+    </nav>
+</div>

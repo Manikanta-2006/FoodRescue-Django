@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In – FoodRescue Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card form-card shadow-sm border-0">
+                <div class="text-center mb-4">
+                    <span class="brand-icon mx-auto mb-2" style="background:#198754; color:#fff; width:44px; height:44px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </span>
+                    <h2 class="fw-bold text-dark">Welcome Back</h2>
+                    <p class="text-muted">Sign in to your FoodRescue account</p>
+                </div>
+
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2">
+                            {% for error in form.non_field_errors %}
+                                <div class="small"><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                            <input type="text" name="username" class="form-control border-start-0" id="{{ form.username.id_for_label }}" placeholder="Enter username" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                            <input type="password" name="password" class="form-control border-start-0" id="{{ form.password.id_for_label }}" placeholder="Enter password" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2.5 fs-6 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Portal
+                    </button>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0">
+                        Don't have an account yet? <a href="{% url 'accounts:register' %}" class="text-success fw-bold">Register as Donor, NGO, or Volunteer</a>
+                    </p>
+                </div>
+
+                <!-- Academic Viva Test Accounts Banner -->
+                <div class="mt-4 p-3 bg-light rounded-3 border small">
+                    <div class="fw-bold text-dark mb-1"><i class="bi bi-info-circle text-primary me-1"></i> Academic Viva Demo Indian Accounts</div>
+                    <div class="text-muted">Use pre-seeded Indian test credentials or register a new user:</div>
+                    <ul class="mb-0 ps-3 mt-1 text-secondary">
+                        <li><strong>Admin:</strong> <code>admin</code> / <code>admin123</code> (Kalyan - Hyderabad)</li>
+                        <li><strong>Donor:</strong> <code>taj_hotel</code> / <code>donor123</code> (Grand Taj Banjara, Hyderabad)</li>
+                        <li><strong>NGO:</strong> <code>hope_shelter</code> / <code>ngo12345</code> (Akshaya Seva Foundation)</li>
+                        <li><strong>Volunteer:</strong> <code>alex_courier</code> / <code>vol12345</code> (Ramesh Kumar - Courier)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

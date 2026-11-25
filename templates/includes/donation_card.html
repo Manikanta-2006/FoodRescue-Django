@@ -1,0 +1,39 @@
+{% load static %}
+<div class="card donation-card">
+    <div class="donation-card-img-wrapper">
+        <img src="{{ donation.get_image_url }}" alt="{{ donation.food_name }}">
+        
+        <div class="donation-card-badge">
+            {% include 'includes/status_badge.html' with status=donation.status %}
+        </div>
+        <div class="donation-card-category">
+            {{ donation.get_category_display }}
+        </div>
+    </div>
+    
+    <div class="donation-card-body">
+        <h5 class="donation-card-title text-truncate" title="{{ donation.food_name }}">
+            {{ donation.food_name }}
+        </h5>
+        
+        <div class="donation-card-meta">
+            <span><i class="bi bi-box-seam text-success"></i> <strong>{{ donation.quantity }}</strong> {{ donation.get_unit_display }}</span>
+            <span><i class="bi bi-geo-alt text-danger"></i> {{ donation.city }}</span>
+            <span><i class="bi bi-clock-history text-warning"></i> Expiry: {{ donation.expiry_at|date:"M d, H:i" }}</span>
+        </div>
+        
+        <p class="donation-card-desc">
+            {{ donation.description|truncatewords:18 }}
+        </p>
+
+        <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+            <small class="text-muted text-truncate" style="max-width: 140px;">
+                <i class="bi bi-person-circle"></i> 
+                {{ donation.donor.profile.organization_name|default:donation.donor.username }}
+            </small>
+            <a href="{% url 'donations:donation_detail_slug' slug=donation.slug %}" class="btn btn-sm btn-outline-forest">
+                View Details <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 text-center">
+                {% if action_type == 'accept' %}
+                    <div class="mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(25,135,84,0.1); color: #198754; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">Accept Food Request?</h3>
+                    <p class="text-muted mb-4">
+                        You are approving the request from <strong>"{{ food_request.receiver.profile.organization_name|default:food_request.receiver.username }}"</strong>
+                        for <strong>{{ food_request.quantity_requested }} {{ food_request.donation.get_unit_display }}</strong> of {{ food_request.donation.food_name }}.<br><br>
+                        This will automatically generate a dispatch task for our volunteer courier network.
+                    </p>
+                {% else %}
+                    <div class="mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(220,53,69,0.1); color: #DC3545; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">Reject Food Request?</h3>
+                    <p class="text-muted mb-4">
+                        Are you sure you want to decline this request from <strong>"{{ food_request.receiver.profile.organization_name|default:food_request.receiver.username }}"</strong>?
+                        The food item will remain available for other verified shelters.
+                    </p>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'requests:donor_incoming_requests' %}" class="btn btn-light px-4">
+                            Cancel
+                        </a>
+                        {% if action_type == 'accept' %}
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-check-lg me-1"></i> Yes, Approve & Dispatch
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="bi bi-x-lg me-1"></i> Yes, Reject Request
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

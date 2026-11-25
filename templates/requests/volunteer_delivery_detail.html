@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Dispatch Sheet #{{ delivery.id }} | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'requests:volunteer_dashboard' %}" class="text-success text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'requests:volunteer_deliveries' %}?tab=my_tasks" class="text-success text-decoration-none">Deliveries</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Dispatch #{{ delivery.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Main Dispatch Information -->
+        <div class="col-lg-8">
+            <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 bg-white mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <span class="badge bg-secondary mb-1">Dispatch Mission #{{ delivery.id }}</span>
+                        <h2 class="fw-bold text-dark mb-0">{{ delivery.food_request.donation.food_name }}</h2>
+                    </div>
+                    <div class="mt-2 mt-md-0">
+                        <span class="badge-status 
+                            {% if delivery.delivery_status == 'ASSIGNED' %}badge-requested
+                            {% elif delivery.delivery_status == 'PICKED_UP' %}badge-collected
+                            {% elif delivery.delivery_status == 'DELIVERED' %}badge-delivered
+                            {% else %}badge-available{% endif %} fs-6">
+                            {{ delivery.get_delivery_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Food Batch Overview -->
+                <div class="p-3 bg-light rounded-3 mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Quantity to Transport</small>
+                            <span class="fw-bold fs-5 text-success">
+                                {{ delivery.food_request.quantity_requested }} {{ delivery.food_request.donation.get_unit_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Category</small>
+                            <span class="fw-bold text-dark">{{ delivery.food_request.donation.get_category_display }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Expiry Deadline</small>
+                            <span class="fw-bold text-warning">{{ delivery.food_request.donation.expiry_at|date:"M d, H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route: From Donor -> To NGO -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pin-map-fill text-danger me-1"></i> Delivery Route Logistics</h5>
+                <div class="row g-3 mb-4">
+                    <!-- Donor Pickup Point -->
+                    <div class="col-md-6">
+                        <div class="card h-100 p-3 border rounded-3 bg-light">
+                            <span class="badge bg-success bg-opacity-25 text-success align-self-start mb-2">Step 1: Pickup Point</span>
+                            <h6 class="fw-bold text-dark mb-1">
+                                {{ delivery.food_request.donation.donor.profile.organization_name|default:delivery.food_request.donation.donor.username }}
+                            </h6>
+                            <p class="small text-muted mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger"></i> {{ delivery.food_request.donation.pickup_address }}, {{ delivery.food_request.donation.city }}
+                            </p>
+                            <div class="mt-auto pt-2 border-top small">
+                                <i class="bi bi-telephone-fill text-success me-1"></i> 
+                                <a href="tel:{{ delivery.food_request.donation.donor.profile.phone }}" class="text-dark fw-bold text-decoration-none">
+                                    {{ delivery.food_request.donation.donor.profile.phone|default:"No phone recorded" }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receiver Drop-off Point -->
+                    <div class="col-md-6">
+                        <div class="card h-100 p-3 border rounded-3 bg-light">
+                            <span class="badge bg-primary bg-opacity-25 text-primary align-self-start mb-2">Step 2: Drop-off Point</span>
+                            <h6 class="fw-bold text-dark mb-1">
+                                {{ delivery.food_request.receiver.profile.organization_name|default:delivery.food_request.receiver.username }}
+                            </h6>
+                            <p class="small text-muted mb-2">
+                                <i class="bi bi-flag-fill text-primary"></i> {{ delivery.food_request.receiver.profile.address|default:delivery.food_request.receiver.profile.city }}
+                            </p>
+                            <div class="mt-auto pt-2 border-top small">
+                                <i class="bi bi-telephone-fill text-primary me-1"></i> 
+                                <a href="tel:{{ delivery.food_request.receiver.profile.phone }}" class="text-dark fw-bold text-decoration-none">
+                                    {{ delivery.food_request.receiver.profile.phone|default:"No phone recorded" }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NGO Distribution Notes -->
+                <h6 class="fw-bold text-dark mb-2">Receiver NGO Note:</h6>
+                <div class="p-3 bg-light rounded-3 border mb-4 small text-secondary">
+                    "{{ delivery.food_request.message }}"
+                </div>
+
+                <!-- Courier Handover Remarks History -->
+                {% if delivery.remarks %}
+                    <h6 class="fw-bold text-dark mb-2">Delivery Log Remarks:</h6>
+                    <div class="p-3 bg-light rounded-3 border mb-4 small text-dark" style="white-space: pre-line;">
+                        {{ delivery.remarks }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Panel (Status Updates) -->
+        <div class="col-lg-4">
+            <div class="card p-4 border-0 shadow-sm rounded-4 bg-white sticky-top" style="top: 90px;">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-sliders me-1 text-primary"></i> Courier Actions</h5>
+
+                {% if delivery.delivery_status == 'ASSIGNED' %}
+                    <!-- Action: Mark Collected -->
+                    <div class="mb-4">
+                        <p class="small text-muted mb-3">
+                            When you have arrived at the donor's address and inspected the food, tap below to mark it as collected.
+                        </p>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="mark_collected">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Pickup Observation (Optional)</label>
+                                <textarea name="remarks" class="form-control" rows="2" placeholder="e.g. 5 boxes packaged hot, clean seals."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning text-dark w-100 py-2.5 fw-bold shadow-sm">
+                                <i class="bi bi-box-seam me-1"></i> Mark as Collected (Start Transit)
+                            </button>
+                        </form>
+                    </div>
+
+                {% elif delivery.delivery_status == 'PICKED_UP' or delivery.delivery_status == 'IN_TRANSIT' %}
+                    <!-- Action: Mark Delivered -->
+                    <div class="mb-4">
+                        <div class="alert alert-info py-2 small mb-3">
+                            <i class="bi bi-truck me-1"></i> <strong>In Transit:</strong> Food was picked up at {{ delivery.pickup_time|date:"H:i" }}.
+                        </div>
+                        <p class="small text-muted mb-3">
+                            When you reach the NGO and hand over the meal containers, complete the delivery below.
+                        </p>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="mark_delivered">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Handover Remarks / Recipient Name *</label>
+                                <textarea name="remarks" class="form-control" rows="3" placeholder="e.g. Handed over to Sister Maria at shelter gate. Quality verified." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 py-2.5 fw-bold shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Confirm Successful Delivery
+                            </button>
+                        </form>
+                    </div>
+
+                {% elif delivery.delivery_status == 'DELIVERED' %}
+                    <!-- Delivery Completed Summary -->
+                    <div class="text-center py-3">
+                        <div class="mx-auto mb-2 text-success fs-1"><i class="bi bi-shield-check"></i></div>
+                        <h5 class="fw-bold text-success mb-1">Delivered Successfully!</h5>
+                        <p class="small text-muted mb-0">Handed over on {{ delivery.delivery_time|date:"M d, Y - H:i" }}. Thank you for your service!</p>
+                    </div>
+                {% endif %}
+
+                <div class="pt-3 border-top text-center">
+                    <a href="{% url 'requests:volunteer_deliveries' %}" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Deliveries List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

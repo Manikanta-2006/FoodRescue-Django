@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}My Food Requests | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='my_requests' %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">My Food Requests & Deliveries</h2>
+                    <p class="text-muted small mb-0">Track donor approvals and volunteer delivery dispatch status</p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'donations:donation_list' %}" class="btn btn-accent text-white shadow-sm">
+                        <i class="bi bi-search me-1"></i> Browse More Food
+                    </a>
+                </div>
+            </div>
+
+            <!-- Status Filter Pills -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <a href="{% url 'requests:ngo_my_requests' %}?status=ALL" class="btn btn-sm {% if current_status == 'ALL' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    All Requests
+                </a>
+                <a href="{% url 'requests:ngo_my_requests' %}?status=PENDING" class="btn btn-sm {% if current_status == 'PENDING' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">
+                    Pending
+                </a>
+                <a href="{% url 'requests:ngo_my_requests' %}?status=APPROVED" class="btn btn-sm {% if current_status == 'APPROVED' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    Approved
+                </a>
+                <a href="{% url 'requests:ngo_my_requests' %}?status=COMPLETED" class="btn btn-sm {% if current_status == 'COMPLETED' %}btn-success{% else %}btn-outline-success{% endif %}">
+                    Completed
+                </a>
+                <a href="{% url 'requests:ngo_my_requests' %}?status=CANCELLED" class="btn btn-sm {% if current_status == 'CANCELLED' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    Cancelled
+                </a>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Food Item & Donor</th>
+                                <th>Quantity</th>
+                                <th>Request Status</th>
+                                <th>Delivery Tracking</th>
+                                <th>Requested On</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requests %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'donations:donation_detail_slug' slug=req.donation.slug %}" class="fw-bold text-dark text-decoration-none">
+                                            {{ req.donation.food_name }}
+                                        </a>
+                                        <div class="small text-muted">
+                                            Donor: {{ req.donation.donor.profile.organization_name|default:req.donation.donor.username }} &bull; {{ req.donation.city }}
+                                        </div>
+                                    </td>
+                                    <td><strong>{{ req.quantity_requested }}</strong> {{ req.donation.get_unit_display }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if req.status == 'PENDING' %}bg-warning text-dark
+                                            {% elif req.status == 'APPROVED' %}bg-primary
+                                            {% elif req.status == 'COMPLETED' %}bg-success
+                                            {% elif req.status == 'REJECTED' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if req.delivery %}
+                                            <div class="small fw-semibold text-primary">
+                                                <i class="bi bi-truck me-1"></i> {{ req.delivery.get_delivery_status_display }}
+                                            </div>
+                                            {% if req.delivery.volunteer %}
+                                                <small class="text-muted d-block">Courier: {{ req.delivery.volunteer.get_full_name|default:req.delivery.volunteer.username }}</small>
+                                            {% else %}
+                                                <small class="text-muted d-block">Awaiting volunteer pickup</small>
+                                            {% endif %}
+                                        {% else %}
+                                            <small class="text-muted">Awaiting donor approval</small>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="small text-muted">{{ req.requested_at|date:"M d, H:i" }}</span></td>
+                                    <td class="text-end">
+                                        {% if req.status == 'PENDING' %}
+                                            <a href="{% url 'requests:ngo_cancel_request' pk=req.id %}" class="btn btn-sm btn-outline-danger" title="Cancel Request">
+                                                Cancel
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small">&bull;</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-2 text-secondary mb-2 d-block"></i>
+                                        No food requests found in this category.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

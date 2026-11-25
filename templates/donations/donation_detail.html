@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ donation.food_name }} – Donation Details | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'donations:home' %}" class="text-success text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'donations:donation_list' %}" class="text-success text-decoration-none">Donations</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ donation.food_name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Left: Image & Quick Specs -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div style="height: 380px; background-color: #E2E8F0; position: relative;">
+                    <img src="{{ donation.get_image_url }}" alt="{{ donation.food_name }}" class="w-100 h-100 object-fit-cover">
+                    <div class="position-absolute top-0 start-0 m-3">
+                        {% include 'includes/status_badge.html' with status=donation.status %}
+                    </div>
+                    <div class="position-absolute bottom-0 end-0 m-3 bg-dark bg-opacity-75 text-white px-3 py-1.5 rounded-pill small fw-bold">
+                        {{ donation.get_category_display }}
+                    </div>
+                </div>
+
+                <div class="card-body p-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-3">Donation Logistics Information</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block mb-1">Quantity Offered</small>
+                                <span class="fs-5 fw-bold text-success">{{ donation.quantity }} {{ donation.get_unit_display }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block mb-1">City / Region</small>
+                                <span class="fs-5 fw-bold text-dark">{{ donation.city }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block mb-1">Prepared At</small>
+                                <span class="fw-semibold text-secondary">{{ donation.prepared_at|date:"M d, Y - H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block mb-1">Best Before / Expiry</small>
+                                <span class="fw-semibold {% if donation.is_expired %}text-danger{% else %}text-warning{% endif %}">
+                                    {{ donation.expiry_at|date:"M d, Y - H:i" }}
+                                    {% if donation.is_expired %}
+                                        (Expired)
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Description, Donor Info & Request Action -->
+        <div class="col-lg-6">
+            <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 bg-white mb-4">
+                <h2 class="fw-bold text-dark mb-2">{{ donation.food_name }}</h2>
+                <div class="d-flex align-items-center gap-2 mb-4 text-muted small">
+                    <span><i class="bi bi-clock me-1"></i> Posted {{ donation.created_at|timesince }} ago</span>
+                    <span>&bull;</span>
+                    <span><i class="bi bi-link-45deg me-1"></i> Slug: <code>{{ donation.slug }}</code></span>
+                </div>
+
+                <h5 class="fw-bold text-success mb-2">Food Description & Safety Notes</h5>
+                <p class="text-secondary mb-4" style="line-height: 1.7; white-space: pre-line;">
+                    {{ donation.description }}
+                </p>
+
+                <h5 class="fw-bold text-success mb-2">Pickup Location</h5>
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-geo-alt-fill text-danger fs-5 mt-1"></i>
+                        <div>
+                            <div class="fw-bold text-dark">{{ donation.pickup_address }}</div>
+                            <div class="small text-muted">{{ donation.city }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donor Profile Card -->
+                <h5 class="fw-bold text-success mb-2">Posted By</h5>
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border mb-4">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 48px; height: 48px;">
+                        {{ donation.donor.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark">
+                            {{ donation.donor.profile.organization_name|default:donation.donor.get_full_name|default:donation.donor.username }}
+                        </div>
+                        <div class="small text-muted">
+                            <span class="badge bg-success bg-opacity-25 text-success">Verified Donor</span>
+                            &bull; Member since {{ donation.donor.date_joined|date:"M Y" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button Block -->
+                <div class="pt-3 border-top">
+                    {% if user.is_authenticated %}
+                        {% if is_ngo %}
+                            {% if user_request %}
+                                <div class="alert alert-info d-flex align-items-center justify-content-between mb-0">
+                                    <div>
+                                        <strong>You requested this food:</strong> 
+                                        <span class="badge bg-primary ms-1">{{ user_request.get_status_display }}</span>
+                                    </div>
+                                    <a href="{% url 'requests:ngo_my_requests' %}" class="btn btn-sm btn-outline-primary">
+                                        Track in My Requests &rarr;
+                                    </a>
+                                </div>
+                            {% elif donation.is_active %}
+                                <a href="{% url 'requests:request_food' donation_id=donation.id %}" class="btn btn-accent btn-lg w-100 shadow-sm">
+                                    <i class="bi bi-box-arrow-in-down me-1"></i> Request This Food Donation
+                                </a>
+                            {% else %}
+                                <div class="alert alert-secondary mb-0">
+                                    <i class="bi bi-info-circle me-1"></i> This donation is currently <strong>{{ donation.get_status_display }}</strong> and cannot accept new requests.
+                                </div>
+                            {% endif %}
+                        {% elif user == donation.donor %}
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'donations:donor_edit_donation' pk=donation.id %}" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="bi bi-pencil-square me-1"></i> Edit
+                                </a>
+                                <a href="{% url 'donations:donor_delete_donation' pk=donation.id %}" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i> Delete
+                                </a>
+                                <a href="{% url 'requests:donor_incoming_requests' %}" class="btn btn-primary flex-grow-1">
+                                    <i class="bi bi-inbox me-1"></i> Check Requests ({{ donation.requests.count }})
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-light border small text-muted mb-0">
+                                Logged in as {{ user_profile.role }}. Only verified NGOs can request surplus food batches.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border">
+                            <span class="small text-muted">Are you an NGO or relief shelter?</span>
+                            <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-sm px-3">
+                                Sign In to Request
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

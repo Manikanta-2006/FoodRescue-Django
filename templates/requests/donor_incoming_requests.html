@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Incoming Food Requests | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='incoming_requests' %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Incoming Food Requests</h2>
+                    <p class="text-muted small mb-0">Review requests from verified NGOs and shelters for your food donations</p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'donations:donor_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Status Filter Tabs -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <a href="{% url 'requests:donor_incoming_requests' %}?status=PENDING" class="btn btn-sm {% if current_status == 'PENDING' %}btn-warning text-dark fw-bold{% else %}btn-outline-warning text-dark{% endif %}">
+                    Pending Approval
+                </a>
+                <a href="{% url 'requests:donor_incoming_requests' %}?status=APPROVED" class="btn btn-sm {% if current_status == 'APPROVED' %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %}">
+                    Approved
+                </a>
+                <a href="{% url 'requests:donor_incoming_requests' %}?status=REJECTED" class="btn btn-sm {% if current_status == 'REJECTED' %}btn-danger fw-bold{% else %}btn-outline-danger{% endif %}">
+                    Rejected
+                </a>
+                <a href="{% url 'requests:donor_incoming_requests' %}?status=ALL" class="btn btn-sm {% if current_status == 'ALL' %}btn-secondary fw-bold{% else %}btn-outline-secondary{% endif %}">
+                    All Requests
+                </a>
+            </div>
+
+            <!-- Requests Table / List -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Requested Food</th>
+                                <th>NGO / Shelter</th>
+                                <th>Quantity</th>
+                                <th>Purpose / Message</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requests %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ req.donation.food_name }}</div>
+                                        <small class="text-muted">Total: {{ req.donation.quantity }} {{ req.donation.get_unit_display }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">
+                                            {{ req.receiver.profile.organization_name|default:req.receiver.username }}
+                                        </div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-telephone me-1"></i> {{ req.receiver.profile.phone|default:"-" }}
+                                            {% if req.receiver.profile.is_verified %}
+                                                <span class="badge bg-success bg-opacity-25 text-success ms-1">Verified</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success">{{ req.quantity_requested }}</span> {{ req.donation.get_unit_display }}
+                                    </td>
+                                    <td>
+                                        <div class="small text-secondary" style="max-width: 200px;">
+                                            {{ req.message|truncatewords:15 }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if req.status == 'PENDING' %}bg-warning text-dark
+                                            {% elif req.status == 'APPROVED' %}bg-primary
+                                            {% elif req.status == 'COMPLETED' %}bg-success
+                                            {% elif req.status == 'REJECTED' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        {% if req.status == 'PENDING' %}
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'requests:donor_accept_request' pk=req.id %}" class="btn btn-success" title="Approve Request">
+                                                    <i class="bi bi-check-lg"></i> Accept
+                                                </a>
+                                                <a href="{% url 'requests:donor_reject_request' pk=req.id %}" class="btn btn-outline-danger" title="Reject Request">
+                                                    <i class="bi bi-x-lg"></i> Reject
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted small">Processed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-2 text-secondary mb-2 d-block"></i>
+                                        No incoming food requests in this category.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

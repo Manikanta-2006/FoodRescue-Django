@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FoodRescue – Rescue Food, Share Hope | Sustainable Food Redistribution{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="hero-badge">
+                    <i class="bi bi-globe-americas"></i> Sustainable Food Network &bull; Zero Hunger Goal
+                </div>
+                <h1>Rescue Food,<br><span style="color: #FCD34D;">Share Hope</span></h1>
+                <p class="hero-lead">
+                    Every day, tons of fresh, edible food is wasted while thousands go hungry.
+                    FoodRescue bridges hotels, restaurants, caterers, and households with verified local shelters and hungry communities in real-time.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'accounts:register' %}?role=Donor" class="btn btn-accent btn-lg px-4 shadow">
+                        <i class="bi bi-box-heart me-1"></i> Donate Food
+                    </a>
+                    <a href="{% url 'donations:donation_list' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-search me-1"></i> Find Available Food
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Live API Search Widget in Hero -->
+            <div class="col-lg-5 mt-4 mt-lg-0">
+                <div class="card p-4 rounded-4 shadow-lg border-0" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-4"></i>
+                        <h5 class="fw-bold text-dark mb-0">Instant Food Finder</h5>
+                    </div>
+                    <p class="text-muted small mb-3">Live search active donations by food name, item, or city.</p>
+                    
+                    <div class="position-relative">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-success"></i></span>
+                            <input type="text" id="liveDonationSearch" class="form-control border-start-0" placeholder="e.g. Biryani, Samosa, Pav Buns, Mangoes...">
+                        </div>
+                        <div id="liveSearchResults" class="list-group shadow position-absolute w-100 mt-1" style="z-index: 1000; display: none; max-height: 240px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-geo-fill text-danger"></i> Hyperlocal city pickup</small>
+                        <a href="{% url 'donations:donation_list' %}" class="small text-success fw-bold text-decoration-none">
+                            View All ({{ active_donations }}) &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Impact Statistics Section (Database Driven) -->
+<section class="py-5" style="margin-top: -30px; position: relative; z-index: 5;">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <div class="stats-counter-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-egg-fried"></i>
+                    </div>
+                    <div class="stat-number">{{ meals_rescued }}</div>
+                    <div class="stat-label">Meals & Portions Rescued</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-counter-card">
+                    <div class="stat-icon" style="color: #0D6EFD; background: rgba(13,110,253,0.1);">
+                        <i class="bi bi-gift-fill"></i>
+                    </div>
+                    <div class="stat-number">{{ total_donations }}</div>
+                    <div class="stat-label">Donation Drives Posted</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-counter-card">
+                    <div class="stat-icon" style="color: #F59E0B; background: rgba(245,158,11,0.1);">
+                        <i class="bi bi-building-check"></i>
+                    </div>
+                    <div class="stat-number">{{ verified_ngos }}</div>
+                    <div class="stat-label">Verified NGO Partners</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-counter-card">
+                    <div class="stat-icon" style="color: #8B5CF6; background: rgba(139,92,246,0.1);">
+                        <i class="bi bi-bicycle"></i>
+                    </div>
+                    <div class="stat-number">{{ volunteers_count }}</div>
+                    <div class="stat-label">Rescue Volunteers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Available Donations Section (From Database) -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+            <div>
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 rounded-pill mb-2">Available Right Now</span>
+                <h2 class="fw-bold mb-1">Surplus Food Ready for Rescue</h2>
+                <p class="text-muted mb-0">Browse real-time listings posted by local hotels, kitchens, and donors.</p>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <a href="{% url 'donations:donation_list' %}" class="btn btn-outline-forest">
+                    Explore All Available Food ({{ active_donations }}) <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        {% if featured_donations %}
+            <div class="row g-4">
+                {% for donation in featured_donations %}
+                    <div class="col-lg-4 col-md-6">
+                        {% include 'includes/donation_card.html' with donation=donation %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-box">
+                <div class="empty-state-icon"><i class="bi bi-check-circle"></i></div>
+                <h4 class="fw-bold text-dark">All Surplus Food Rescued!</h4>
+                <p class="mb-3">Currently, there are no unrequested donations waiting. Are you a hotel or individual with surplus food?</p>
+                <a href="{% url 'accounts:register' %}?role=Donor" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Post Food Donation
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis fw-bold px-3 py-1.5 rounded-pill mb-2">Simple & Transparent</span>
+            <h2 class="fw-bold">How FoodRescue Works</h2>
+            <p class="text-muted">A streamlined, 4-step redistribution pipeline ensuring food safety, speed, and accountability.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5 class="fw-bold mb-2">Donor Posts Surplus</h5>
+                    <p class="text-muted small mb-0">
+                        Restaurants, hostels, or individuals list fresh leftover food, specifying portion counts, preparation timestamp, and expiry window.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5 class="fw-bold mb-2">NGO Requests Food</h5>
+                    <p class="text-muted small mb-0">
+                        Verified orphanages and community shelters browse active donations in their locality and place an immediate request.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5 class="fw-bold mb-2">Volunteer Dispatched</h5>
+                    <p class="text-muted small mb-0">
+                        A registered volunteer courier accepts the transport mission, picks up hot/fresh meals from the donor, and begins delivery.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h5 class="fw-bold mb-2">Delivered to Hungry</h5>
+                    <p class="text-muted small mb-0">
+                        Meals arrive safely at the shelter, satisfying hunger, minimizing carbon emissions, and eliminating food wastage.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 rounded-pill mb-2">Why It Matters</span>
+                <h2 class="fw-bold mb-3">The Multiplier Effect of Food Redistribution</h2>
+                <p class="text-secondary mb-4">
+                    Food waste is responsible for nearly 10% of global greenhouse emissions. Simultaneously, millions face acute nutritional insecurity. FoodRescue delivers a win-win for our community and planet:
+                </p>
+
+                <div class="d-flex gap-3 mb-3">
+                    <div class="text-success fs-3"><i class="bi bi-shield-fill-check"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Zero Landfill Methane Emissions</h6>
+                        <p class="small text-muted mb-0">Diverting edible food from dumps reduces toxic methane release and water wastage.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mb-3">
+                    <div class="text-success fs-3"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Dignified Nutrition for Shelters</h6>
+                        <p class="small text-muted mb-0">High-quality, freshly cooked meals nourish children, seniors, and disadvantaged families.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <div class="text-success fs-3"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Corporate ESG & Tax Compliance</h6>
+                        <p class="small text-muted mb-0">Hotels and caterers receive digital proof of donation for CSR and food-safety certification.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card p-4 rounded-4 shadow-sm border-0" style="background: linear-gradient(135deg, #14532D, #198754); color: #fff;">
+                    <h3 class="fw-bold text-white mb-3">Join the Food Revolution</h3>
+                    <p class="text-light opacity-90 mb-4">
+                        Whether you have 5 extra lunch trays or a truckload of bakery loaves, your surplus can transform a family's day.
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:register' %}?role=Donor" class="btn btn-warning fw-bold text-dark py-2.5">
+                            <i class="bi bi-box-seam me-1"></i> Register as a Food Donor
+                        </a>
+                        <a href="{% url 'accounts:register' %}?role=NGO" class="btn btn-light fw-bold py-2.5">
+                            <i class="bi bi-building me-1"></i> Register as an NGO Receiver
+                        </a>
+                        <a href="{% url 'accounts:register' %}?role=Volunteer" class="btn btn-outline-light fw-bold py-2.5">
+                            <i class="bi bi-person-walking me-1"></i> Volunteer to Transport Food
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5 bg-light border-top text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-2">Have Questions or Need Help?</h2>
+        <p class="text-muted mb-4 max-w-600 mx-auto">
+            Our logistics support team is on standby 24/7 to connect bulk catering drives with local NGOs.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'donations:contact' %}" class="btn btn-primary px-4 py-2">
+                <i class="bi bi-chat-dots me-1"></i> Contact Support
+            </a>
+            <a href="{% url 'donations:how_it_works' %}" class="btn btn-outline-secondary px-4 py-2">
+                <i class="bi bi-info-circle me-1"></i> Learn More
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact & Support – FoodRescue Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row g-5">
+                <!-- Contact Info Sidebar -->
+                <div class="col-lg-5">
+                    <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 rounded-pill mb-2">Get in Touch</span>
+                    <h2 class="fw-bold mb-3">We'd Love to Hear From You</h2>
+                    <p class="text-muted mb-4">
+                        Have a question regarding bulk food collection, NGO onboarding, or university viva demonstrations? Send us a message!
+                    </p>
+
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="text-success fs-4"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <div class="fw-bold text-dark">India Logistics Headquarters</div>
+                            <div class="small text-muted">Plot 42, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500033</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="text-success fs-4"><i class="bi bi-telephone-fill"></i></div>
+                        <div>
+                            <div class="fw-bold text-dark">Toll-Free National Helpline</div>
+                            <div class="small text-muted">+91 40 2355 8900 / +91 98490 12345</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-3 mb-4">
+                        <div class="text-success fs-4"><i class="bi bi-envelope-fill"></i></div>
+                        <div>
+                            <div class="fw-bold text-dark">Email Support</div>
+                            <div class="small text-muted">helpdesk@foodrescue.org.in</div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fw-bold text-dark small mb-1"><i class="bi bi-mortarboard-fill text-primary me-1"></i> Academic Project Demonstration</div>
+                        <div class="text-muted small">
+                            Course: INT253 Web Development in Python Using Django.<br>
+                            Includes database models, ORM operations, URL routing converters, and responsive DTL views.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="col-lg-7">
+                    <div class="card form-card shadow-sm border-0">
+                        <h4 class="fw-bold text-dark mb-3">Send a Message</h4>
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Your Name *</label>
+                                    <input type="text" name="name" class="form-control" placeholder="John Doe" required value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" name="email" class="form-control" placeholder="john@example.com" required value="{% if user.is_authenticated %}{{ user.email }}{% endif %}">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Subject</label>
+                                <input type="text" name="subject" class="form-control" placeholder="e.g., Bulk Catering Inquiry, Account Question">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Your Message *</label>
+                                <textarea name="message" class="form-control" rows="5" placeholder="How can we help you?" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary px-4 py-2.5">
+                                <i class="bi bi-send-fill me-1"></i> Submit Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Donor Dashboard | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='dashboard' %}
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="col-lg-9">
+            <!-- Welcome Header -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Donor Management Portal</h2>
+                    <p class="text-muted small mb-0">Welcome back, {{ user.first_name|default:user.username }}. Here is your food donation overview.</p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'donations:donor_add_donation' %}" class="btn btn-primary shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Post New Donation
+                    </a>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="metric-card">
+                        <div class="metric-title">Total Posted</div>
+                        <div class="metric-val text-dark">{{ total_posted }}</div>
+                        <small class="text-muted"><i class="bi bi-collection"></i> All time</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="metric-card">
+                        <div class="metric-title">Available Now</div>
+                        <div class="metric-val text-success">{{ available_count }}</div>
+                        <small class="text-muted"><i class="bi bi-check-circle"></i> Open for NGOs</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="metric-card accent">
+                        <div class="metric-title">Pending Requests</div>
+                        <div class="metric-val text-warning">{{ pending_requests_count }}</div>
+                        <small class="text-muted"><i class="bi bi-hourglass-split"></i> Awaiting your review</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="metric-card secondary">
+                        <div class="metric-title">Delivered</div>
+                        <div class="metric-val text-primary">{{ completed_count }}</div>
+                        <small class="text-muted"><i class="bi bi-trophy"></i> Safely fed</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert if pending incoming requests exist -->
+            {% if pending_requests_count > 0 %}
+                <div class="alert alert-warning shadow-sm border-0 d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <i class="bi bi-bell-fill me-2 fs-5"></i>
+                        <strong>Action Needed:</strong> You have <strong>{{ pending_requests_count }}</strong> pending food request{{ pending_requests_count|pluralize }} from local shelters.
+                    </div>
+                    <a href="{% url 'requests:donor_incoming_requests' %}" class="btn btn-sm btn-warning text-dark fw-bold">
+                        Review Requests &rarr;
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Recent Donations Table -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-1 text-success"></i> Recent Food Donations</h5>
+                    <a href="{% url 'donations:donor_my_donations' %}" class="small text-success fw-bold text-decoration-none">
+                        View All Donations &rarr;
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Food Item</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Expiry Time</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in recent_donations %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ donation.food_name }}</div>
+                                        <small class="text-muted">{{ donation.city }}</small>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark">{{ donation.get_category_display }}</span></td>
+                                    <td><span class="fw-bold text-success">{{ donation.quantity }}</span> {{ donation.get_unit_display }}</td>
+                                    <td>
+                                        <span class="small {% if donation.is_expired %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                            {{ donation.expiry_at|date:"M d, H:i" }}
+                                        </span>
+                                    </td>
+                                    <td>{% include 'includes/status_badge.html' with status=donation.status %}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'donations:donation_detail_slug' slug=donation.slug %}" class="btn btn-outline-secondary" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'donations:donor_edit_donation' pk=donation.id %}" class="btn btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        You have not posted any food donations yet.
+                                        <div class="mt-2">
+                                            <a href="{% url 'donations:donor_add_donation' %}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-plus-circle me-1"></i> Post Your First Donation
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

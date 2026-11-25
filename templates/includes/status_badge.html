@@ -1,0 +1,31 @@
+{% if status == 'AVAILABLE' %}
+    <span class="badge-status badge-available">
+        <i class="bi bi-check-circle-fill"></i> Available
+    </span>
+{% elif status == 'REQUESTED' %}
+    <span class="badge-status badge-requested">
+        <i class="bi bi-hourglass-split"></i> Requested
+    </span>
+{% elif status == 'ACCEPTED' %}
+    <span class="badge-status badge-accepted">
+        <i class="bi bi-hand-thumbs-up-fill"></i> Accepted
+    </span>
+{% elif status == 'COLLECTED' %}
+    <span class="badge-status badge-collected">
+        <i class="bi bi-truck"></i> In Transit
+    </span>
+{% elif status == 'DELIVERED' %}
+    <span class="badge-status badge-delivered">
+        <i class="bi bi-shield-check"></i> Delivered
+    </span>
+{% elif status == 'EXPIRED' %}
+    <span class="badge-status badge-expired">
+        <i class="bi bi-x-circle-fill"></i> Expired
+    </span>
+{% elif status == 'CANCELLED' %}
+    <span class="badge-status badge-cancelled">
+        <i class="bi bi-slash-circle"></i> Cancelled
+    </span>
+{% else %}
+    <span class="badge bg-secondary">{{ status }}</span>
+{% endif %}

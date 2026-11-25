@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Volunteer Courier Portal | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='dashboard' %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Volunteer Logistics Hub</h2>
+                    <p class="text-muted small mb-0">Welcome hero, {{ user.first_name|default:user.username }}. Thank you for connecting donors with community shelters.</p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'requests:volunteer_deliveries' %}?tab=available" class="btn btn-warning text-dark fw-bold shadow-sm">
+                        <i class="bi bi-bicycle me-1"></i> Claim Open Pickups ({{ open_tasks_count }})
+                    </a>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="metric-card accent">
+                        <div class="metric-title">Available Pickups</div>
+                        <div class="metric-val text-warning">{{ open_tasks_count }}</div>
+                        <small class="text-muted"><i class="bi bi-bell"></i> Waiting for a courier</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card info">
+                        <div class="metric-title">My Active Tasks</div>
+                        <div class="metric-val text-primary">{{ active_deliveries_count }}</div>
+                        <small class="text-muted"><i class="bi bi-truck"></i> Picked up or in transit</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card secondary">
+                        <div class="metric-title">Completed Deliveries</div>
+                        <div class="metric-val text-success">{{ completed_deliveries_count }}</div>
+                        <small class="text-muted"><i class="bi bi-trophy"></i> Successfully handed over</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Active Deliveries Section -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-truck text-primary me-1"></i> My Active Deliveries in Progress</h5>
+                    <a href="{% url 'requests:volunteer_deliveries' %}?tab=my_tasks" class="small text-primary fw-bold text-decoration-none">
+                        View All Active &rarr;
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Delivery ID</th>
+                                <th>Food Item & Qty</th>
+                                <th>Donor Pickup</th>
+                                <th>Receiver NGO</th>
+                                <th>Status</th>
+                                <th class="text-end">Dispatch Sheet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in my_active_tasks %}
+                                <tr>
+                                    <td><strong>#{{ d.id }}</strong></td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ d.food_request.donation.food_name }}</div>
+                                        <small class="text-muted">{{ d.food_request.quantity_requested }} {{ d.food_request.donation.get_unit_display }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="small">{{ d.food_request.donation.pickup_address|truncatewords:6 }}</div>
+                                        <small class="text-muted">{{ d.food_request.donation.city }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="small fw-semibold">{{ d.food_request.receiver.profile.organization_name|default:d.food_request.receiver.username }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if d.delivery_status == 'ASSIGNED' %}bg-warning text-dark
+                                            {% elif d.delivery_status == 'PICKED_UP' %}bg-info text-dark
+                                            {% elif d.delivery_status == 'IN_TRANSIT' %}bg-primary
+                                            {% elif d.delivery_status == 'DELIVERED' %}bg-success
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ d.get_delivery_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'requests:volunteer_delivery_detail' pk=d.id %}" class="btn btn-sm btn-primary">
+                                            Open Sheet &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        You currently have no deliveries in transit.
+                                        <div class="mt-2">
+                                            <a href="{% url 'requests:volunteer_deliveries' %}?tab=available" class="btn btn-sm btn-warning text-dark fw-bold">
+                                                Claim an Available Delivery
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Open Tasks Waiting to be Claimed -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt text-warning me-1"></i> Nearby Pickups Needing Volunteers</h5>
+                    <a href="{% url 'requests:volunteer_deliveries' %}?tab=available" class="small text-warning fw-bold text-decoration-none">
+                        View All Open &rarr;
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Pickup Address</th>
+                                <th>Destination NGO</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in available_tasks %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ d.food_request.donation.food_name }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="small">{{ d.food_request.donation.pickup_address|truncatewords:6 }}</div>
+                                        <small class="text-muted">{{ d.food_request.donation.city }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="small fw-semibold">{{ d.food_request.receiver.profile.organization_name|default:d.food_request.receiver.username }}</div>
+                                    </td>
+                                    <td><strong>{{ d.food_request.quantity_requested }}</strong> {{ d.food_request.donation.get_unit_display }}</td>
+                                    <td class="text-end">
+                                        <a href="{% url 'requests:volunteer_claim_delivery' pk=d.id %}" class="btn btn-sm btn-outline-success">
+                                            Claim Task
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No unassigned delivery tasks right now. Great job team!</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

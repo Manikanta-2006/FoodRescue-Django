@@ -1,0 +1,72 @@
+<footer class="footer-custom">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Brand & Mission Column -->
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="brand-icon" style="background:#22C55E; color:#fff; width:34px; height:34px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-heart-pulse-fill"></i>
+                    </span>
+                    <h4 class="text-white mb-0 fw-bold">Food<span class="text-success">Rescue</span> <span class="badge bg-warning text-dark fs-6 ms-1">India</span></h4>
+                </div>
+                <p class="text-secondary small pe-lg-3" style="color: #CBD5E1 !important; line-height: 1.6;">
+                    Connecting surplus food from Indian hotels, wedding banquet halls, catering agencies, and households directly with verified orphanages, old-age homes, and community langars through our dedicated volunteer network across India.
+                </p>
+                <div class="d-flex gap-3 text-secondary mt-3">
+                    <a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-light fs-5"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-light fs-5"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+
+            <!-- Explore Links -->
+            <div class="col-lg-2 col-md-6">
+                <h5>Platform</h5>
+                <a href="{% url 'donations:home' %}"><i class="bi bi-chevron-right small"></i> Home</a>
+                <a href="{% url 'donations:donation_list' %}"><i class="bi bi-chevron-right small"></i> Available Food</a>
+                <a href="{% url 'donations:how_it_works' %}"><i class="bi bi-chevron-right small"></i> How It Works</a>
+                <a href="{% url 'donations:about' %}"><i class="bi bi-chevron-right small"></i> About Our Mission</a>
+                <a href="{% url 'donations:contact' %}"><i class="bi bi-chevron-right small"></i> Contact Us</a>
+            </div>
+
+            <!-- Roles Information (Academic Str converter links) -->
+            <div class="col-lg-3 col-md-6">
+                <h5>Community Roles</h5>
+                <a href="{% url 'accounts:role_info' role_name='donor' %}"><i class="bi bi-chevron-right small"></i> Food Donors (Hotels & Caterers)</a>
+                <a href="{% url 'accounts:role_info' role_name='ngo' %}"><i class="bi bi-chevron-right small"></i> NGO & Ashram Portals</a>
+                <a href="{% url 'accounts:role_info' role_name='volunteer' %}"><i class="bi bi-chevron-right small"></i> Volunteer Couriers (Seva Heroes)</a>
+                <a href="{% url 'donations:api_donations' %}" target="_blank"><i class="bi bi-chevron-right small"></i> JSON API (Food Donations)</a>
+                <a href="{% url 'donations:api_stats' %}" target="_blank"><i class="bi bi-chevron-right small"></i> JSON API (Live India Stats)</a>
+            </div>
+
+            <!-- Contact & Helpdesk -->
+            <div class="col-lg-3 col-md-6">
+                <h5>National Helpline & Office</h5>
+                <p class="small text-secondary mb-2" style="color: #CBD5E1 !important;">
+                    <i class="bi bi-geo-alt-fill text-success me-2"></i> Plot 42, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500033
+                </p>
+                <p class="small text-secondary mb-2" style="color: #CBD5E1 !important;">
+                    <i class="bi bi-telephone-fill text-success me-2"></i> +91 40 2355 8900 / +91 98490 12345
+                </p>
+                <p class="small text-secondary mb-3" style="color: #CBD5E1 !important;">
+                    <i class="bi bi-envelope-fill text-success me-2"></i> seva@foodrescue.org.in
+                </p>
+                <div class="p-2 rounded bg-dark bg-opacity-50 small border border-secondary border-opacity-25 text-light">
+                    <span class="badge bg-warning text-dark me-1">Zero Annadaan Waste</span>
+                    Every meal rescued feeds hungry souls across India.
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic & Copyright Bar -->
+        <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-center text-md-start">
+            <div>
+                &copy; 2026 FoodRescue India. Built with Python & Django. All rights reserved.
+            </div>
+            <div class="small" style="color: #94A3B8;">
+                Academic Project: <strong>INT253 Web Development in Python Using Django</strong>
+            </div>
+        </div>
+    </div>
+</footer>

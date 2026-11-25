@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}NGO Receiving Dashboard | FoodRescue{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-3">
+            {% include 'includes/dashboard_sidebar.html' with active_tab='dashboard' %}
+        </div>
+
+        <!-- Main NGO Content -->
+        <div class="col-lg-9">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">NGO Relief Center Portal</h2>
+                    <p class="text-muted small mb-0">Logged in for: <strong>{{ user_profile.organization_name|default:user.username }}</strong></p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{% url 'donations:donation_list' %}" class="btn btn-accent shadow-sm">
+                        <i class="bi bi-search me-1"></i> Browse Available Food
+                    </a>
+                </div>
+            </div>
+
+            <!-- Verification Notice -->
+            {% if not is_verified_ngo %}
+                <div class="alert alert-info shadow-sm border-0 d-flex align-items-center mb-4">
+                    <i class="bi bi-shield-exclamation fs-4 me-3 text-primary"></i>
+                    <div class="small">
+                        <strong>Organization Verification in Progress:</strong> Your NGO profile is under review by our admin team.
+                        You can still browse active food donations and submit requests immediately.
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="metric-card">
+                        <div class="metric-title">Total Requests</div>
+                        <div class="metric-val text-dark">{{ total_requests }}</div>
+                        <small class="text-muted"><i class="bi bi-inbox"></i> Lifetime claims</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="metric-card accent">
+                        <div class="metric-title">Pending Approval</div>
+                        <div class="metric-val text-warning">{{ pending_count }}</div>
+                        <small class="text-muted"><i class="bi bi-hourglass-split"></i> Awaiting donor</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="metric-card info">
+                        <div class="metric-title">In Transit</div>
+                        <div class="metric-val text-primary">{{ approved_count }}</div>
+                        <small class="text-muted"><i class="bi bi-truck"></i> Volunteer en route</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="metric-card secondary">
+                        <div class="metric-title">Fulfilled</div>
+                        <div class="metric-val text-success">{{ completed_count }}</div>
+                        <small class="text-muted"><i class="bi bi-check2-circle"></i> Successfully received</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fresh Food Nearby -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-fire text-danger me-1"></i> Fresh Surplus Ready for Pickup</h5>
+                    <a href="{% url 'donations:donation_list' %}" class="small text-success fw-bold text-decoration-none">
+                        Explore All &rarr;
+                    </a>
+                </div>
+                <div class="row g-3">
+                    {% for donation in nearby_donations %}
+                        <div class="col-md-6">
+                            {% include 'includes/donation_card.html' with donation=donation %}
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <div class="p-4 bg-white rounded-3 border text-center text-muted">
+                                No new donations currently waiting in your area. Check back shortly!
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Requests Table -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-1 text-primary"></i> My Recent Requests</h5>
+                    <a href="{% url 'requests:ngo_my_requests' %}" class="small text-primary fw-bold text-decoration-none">
+                        View All ({{ total_requests }}) &rarr;
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Requested Item</th>
+                                <th>Quantity</th>
+                                <th>Requested Date</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in recent_requests %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ req.donation.food_name }}</div>
+                                        <small class="text-muted">Donor: {{ req.donation.donor.profile.organization_name|default:req.donation.donor.username }}</small>
+                                    </td>
+                                    <td><strong>{{ req.quantity_requested }}</strong> {{ req.donation.get_unit_display }}</td>
+                                    <td><span class="small text-muted">{{ req.requested_at|date:"M d, H:i" }}</span></td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if req.status == 'PENDING' %}bg-warning text-dark
+                                            {% elif req.status == 'APPROVED' %}bg-primary
+                                            {% elif req.status == 'COMPLETED' %}bg-success
+                                            {% elif req.status == 'REJECTED' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'requests:ngo_my_requests' %}" class="btn btn-sm btn-outline-secondary">
+                                            Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No food requests made yet.
+                                        <div class="mt-2">
+                                            <a href="{% url 'donations:donation_list' %}" class="btn btn-sm btn-accent text-white">
+                                                Browse Donations to Request
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
