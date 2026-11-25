@@ -469,7 +469,7 @@ flowchart TD
 # 5. GitHub Link
 
 **Repository URL:**  
-`https://github.com/bandinagacharan/FoodRescue-Django-Platform`  
+`https://github.com/Manikanta-2006/FoodRescue-Django`  
 *(Access Mode: Public / Educational Review)*
 
 **Repository Contents:**
